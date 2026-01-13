@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Compras Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s ease; }
+        .modal-overlay { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); }
+        .line-through-thick { text-decoration: line-through; text-decoration-thickness: 2px; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen pb-20">
+
+    <div class="max-w-md mx-auto px-4 pt-6">
+        <!-- Barra superior: Usuario y Tema -->
+        <div class="flex justify-between items-center mb-6">
+            <div id="user-badge" class="bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-mono px-2 py-1 rounded-md overflow-hidden text-ellipsis whitespace-nowrap max-w-[120px]">
+                ID: ...
+            </div>
+            
+            <div class="flex gap-2">
+                <button id="theme-toggle" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-yellow-400">
+                    <svg id="sun-icon" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"/></svg>
+                    <svg id="moon-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Título y Descripción -->
+        <header class="mb-8 text-center sm:text-left">
+            <h1 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">Lista de Compras Pro</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                Organiza tus compras en dos pasos: primero <strong>planea</strong> lo que necesitas y luego controla tu <strong>presupuesto en tiempo real</strong> mientras recorres el supermercado.
+            </p>
+        </header>
+
+        <!-- Selector de Modos (Tabs) -->
+        <div class="flex bg-slate-200 dark:bg-slate-900 p-1 rounded-2xl mb-8">
+            <button onclick="setMode('plan')" id="btn-plan" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-800 shadow-sm">1. Planear Lista</button>
+            <button onclick="setMode('shop')" id="btn-shop" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all text-slate-500">2. En el Súper</button>
+        </div>
+
+        <!-- VISTA: PLANEAR -->
+        <div id="view-plan" class="space-y-6">
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+                <h2 class="text-xs font-bold text-teal-600 mb-4 uppercase tracking-widest">Añadir faltantes</h2>
+                <div class="grid grid-cols-4 gap-3 mb-4">
+                    <div class="col-span-1">
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1 tracking-tighter">CANT.</label>
+                        <input type="number" id="plan-qty" value="1" min="1" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg outline-none dark:text-white border border-transparent focus:border-teal-500 transition-all">
+                    </div>
+                    <div class="col-span-3">
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1 tracking-tighter">PRODUCTO</label>
+                        <input type="text" id="plan-item" placeholder="¿Qué falta?" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg outline-none dark:text-white border border-transparent focus:border-teal-500 transition-all">
+                    </div>
+                </div>
+                <button onclick="addItem()" class="w-full bg-slate-900 dark:bg-teal-600 text-white font-bold py-3 rounded-xl active:scale-95 transition-all shadow-lg dark:shadow-none">
+                    Añadir a la lista
+                </button>
+            </div>
+        </div>
+
+        <!-- VISTA: COMPRAR (Modo tiempo real) -->
+        <div id="view-shop" class="hidden animate-in fade-in duration-300">
+            <div class="bg-teal-600 text-white p-6 rounded-2xl shadow-xl mb-6 relative overflow-hidden">
+                <div class="relative z-10">
+                    <h2 class="text-[10px] font-bold uppercase opacity-80 mb-1 tracking-widest">Presupuesto en Carrito</h2>
+                    <p id="spent-total" class="text-3xl font-bold">₡0.00</p>
+                    <p class="text-[10px] mt-2 opacity-70 italic">* Sumando solo productos con precio confirmado.</p>
+                </div>
+                <!-- Decoración visual -->
+                <div class="absolute -right-4 -bottom-4 opacity-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="white"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Productos -->
+        <div id="loading-spinner" class="text-center py-10 hidden">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto"></div>
+        </div>
+        
+        <div class="mt-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-slate-400 text-[10px] uppercase tracking-widest" id="list-title">Artículos pendientes</h3>
+                <button onclick="showClearModal()" class="text-rose-500 text-[10px] font-bold uppercase hover:underline">Vaciar lista</button>
+            </div>
+            <ul id="shopping-list" class="space-y-3"></ul>
+        </div>
+
+        <!-- Créditos Finales -->
+        <footer class="mt-16 mb-24 text-center border-t border-slate-200 dark:border-slate-800 pt-8">
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                Hecho por <span class="text-slate-600 dark:text-slate-300">José Arturo Hernández Méndez</span> <br> 
+                con ayuda de <span class="text-teal-600 dark:text-teal-500">Gemini</span>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Barra de Total Fija (Solo para visualización rápida) -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 shadow-2xl z-40 transition-colors">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div>
+                <p class="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-tighter">Total en Caja</p>
+                <p id="total-amount-footer" class="text-2xl font-bold text-teal-600 dark:text-teal-400 tracking-tight">₡0.00</p>
+            </div>
+            <div class="text-right">
+                <span class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full font-bold text-slate-500 dark:text-slate-400">SESIÓN PRIVADA</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Precio (Tiempo Real) -->
+    <div id="price-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 class="text-lg font-bold mb-1 dark:text-white" id="modal-item-name">Producto</h3>
+            <p class="text-xs text-slate-500 mb-4 italic">¿Cuánto cuesta en el estante?</p>
+            <div class="relative mb-6">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xl">₡</span>
+                <input type="number" id="real-price-input" step="0.01" class="w-full pl-10 pr-4 py-4 bg-slate-100 dark:bg-slate-800 rounded-xl outline-none text-2xl font-bold dark:text-white border-2 border-transparent focus:border-teal-500 transition-all" placeholder="0.00" autofocus>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closePriceModal()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 transition-colors">Cancelar</button>
+                <button onclick="confirmPurchase()" class="flex-1 py-3 bg-teal-600 text-white rounded-xl font-bold shadow-lg shadow-teal-200 dark:shadow-none hover:bg-teal-700 transition-colors">Al Carrito</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmar Borrado -->
+    <div id="confirm-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800">
+            <h3 class="text-xl font-bold mb-2 dark:text-white">¿Vaciar lista?</h3>
+            <p class="text-sm text-slate-500 mb-6">Se borrarán todos los artículos de tu lista personal permanentemente.</p>
+            <div class="flex gap-3">
+                <button onclick="hideClearModal()" class="flex-1 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl font-semibold hover:bg-slate-200 transition-colors">No, volver</button>
+                <button onclick="clearAllData()" class="flex-1 py-2 bg-rose-600 text-white rounded-xl font-semibold hover:bg-rose-700 transition-colors">Sí, borrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'shopping-list-jorge';
+
+        let currentUser = null, items = [], currentMode = 'plan', activeItemId = null;
+
+        // --- Gestión de Modo ---
+        window.setMode = (mode) => {
+            currentMode = mode;
+            const btnPlan = document.getElementById('btn-plan'), btnShop = document.getElementById('btn-shop');
+            const viewPlan = document.getElementById('view-plan'), viewShop = document.getElementById('view-shop');
+            
+            if(mode === 'plan') {
+                btnPlan.className = "flex-1 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 shadow-sm transition-all";
+                btnShop.className = "flex-1 py-2 text-sm font-bold text-slate-500 transition-all";
+                viewPlan.classList.remove('hidden');
+                viewShop.classList.add('hidden');
+                document.getElementById('list-title').innerText = "Artículos para comprar";
+            } else {
+                btnShop.className = "flex-1 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 shadow-sm transition-all";
+                btnPlan.className = "flex-1 py-2 text-sm font-bold text-slate-500 transition-all";
+                viewShop.classList.remove('hidden');
+                viewPlan.classList.add('hidden');
+                document.getElementById('list-title').innerText = "Control de Carrito";
+            }
+            renderItems();
+        };
+
+        // --- Firebase Auth ---
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth error:", error);
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('user-badge').innerText = `ID: ${user.uid.substring(0, 10)}...`;
+                subscribeToData();
+            }
+        });
+
+        function subscribeToData() {
+            if (!currentUser) return;
+            document.getElementById('loading-spinner').classList.remove('hidden');
+            const itemsRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'items');
+            onSnapshot(itemsRef, (snapshot) => {
+                items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderItems();
+                document.getElementById('loading-spinner').classList.add('hidden');
+            }, (err) => console.error("Snapshot error:", err));
+        }
+
+        function renderItems() {
+            const listEl = document.getElementById('shopping-list');
+            const spentEl = document.getElementById('spent-total');
+            const footerTotalEl = document.getElementById('total-amount-footer');
+            listEl.innerHTML = '';
+            let totalSpent = 0;
+
+            const sortedItems = items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+            sortedItems.forEach(item => {
+                const isPurchased = item.purchased || false;
+                const subtotal = (item.qty || 0) * (item.price || 0);
+                if (isPurchased) totalSpent += subtotal;
+
+                const li = document.createElement('li');
+                li.className = `bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex justify-between items-center transition-all ${isPurchased && currentMode === 'plan' ? 'opacity-40' : ''}`;
+                
+                if (currentMode === 'plan') {
+                    li.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-xs font-bold text-slate-500">${item.qty}x</div>
+                            <span class="font-medium text-sm dark:text-slate-200 ${isPurchased ? 'line-through' : ''}">${item.item}</span>
+                        </div>
+                        <button onclick="deleteItem('${item.id}')" class="text-slate-300 hover:text-rose-500 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
+                    `;
+                } else {
+                    li.innerHTML = `
+                        <div class="flex items-center gap-3 flex-1">
+                            <div onclick="openPriceModal('${item.id}', '${item.item}')" class="w-7 h-7 border-2 border-teal-500 rounded-full flex items-center justify-center cursor-pointer transition-all ${isPurchased ? 'bg-teal-500 border-teal-500' : 'hover:bg-teal-50'}">
+                                ${isPurchased ? '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}
+                            </div>
+                            <div class="flex-1 cursor-pointer" onclick="openPriceModal('${item.id}', '${item.item}')">
+                                <p class="text-sm font-bold ${isPurchased ? 'text-slate-400 line-through' : 'dark:text-slate-200'}">${item.qty}x ${item.item}</p>
+                                <p class="text-[10px] ${isPurchased ? 'text-teal-600 font-bold' : 'text-slate-400 italic tracking-tight'}">
+                                    ${isPurchased ? '₡' + subtotal.toLocaleString('es-CR') : 'Tocar para confirmar precio'}
+                                </p>
+                            </div>
+                        </div>
+                        ${isPurchased ? `<button onclick="togglePurchased('${item.id}', true)" class="text-slate-400 dark:text-slate-600 text-[10px] uppercase font-bold px-2 hover:text-teal-600 transition-colors">Editar</button>` : ''}
+                    `;
+                }
+                listEl.appendChild(li);
+            });
+
+            const formattedTotal = `₡${totalSpent.toLocaleString('es-CR', { minimumFractionDigits: 2 })}`;
+            if(spentEl) spentEl.innerText = formattedTotal;
+            if(footerTotalEl) footerTotalEl.innerText = formattedTotal;
+        }
+
+        // --- Acciones de Datos ---
+        window.addItem = async () => {
+            const nameEl = document.getElementById('plan-item'), qtyEl = document.getElementById('plan-qty');
+            const name = nameEl.value.trim(), qty = parseInt(qtyEl.value);
+            if (!name || isNaN(qty)) return;
+            await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'items'), { 
+                item: name, qty, price: 0, purchased: false, createdAt: Date.now() 
+            });
+            nameEl.value = ''; nameEl.focus();
+        };
+
+        window.openPriceModal = (id, name) => {
+            activeItemId = id;
+            document.getElementById('modal-item-name').innerText = name;
+            document.getElementById('real-price-input').value = '';
+            document.getElementById('price-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('real-price-input').focus(), 150);
+        };
+
+        window.closePriceModal = () => {
+            document.getElementById('price-modal').classList.add('hidden');
+            activeItemId = null;
+        };
+
+        window.confirmPurchase = async () => {
+            const val = document.getElementById('real-price-input').value;
+            const price = parseFloat(val);
+            if (isNaN(price) || !activeItemId) return;
+            const itemRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'items', activeItemId);
+            await updateDoc(itemRef, { price: price, purchased: true });
+            closePriceModal();
+        };
+
+        window.togglePurchased = async (id, status) => {
+            const itemRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'items', id);
+            await updateDoc(itemRef, { purchased: !status });
+        };
+
+        window.deleteItem = async (id) => await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'items', id));
+        
+        window.clearAllData = async () => {
+            const snap = await getDocs(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'items'));
+            const batch = writeBatch(db);
+            snap.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+            hideClearModal();
+        };
+
+        window.showClearModal = () => document.getElementById('confirm-modal').classList.remove('hidden');
+        window.hideClearModal = () => document.getElementById('confirm-modal').classList.add('hidden');
+
+        // --- Gestión de Tema ---
+        const themeToggle = document.getElementById('theme-toggle');
+        function applyTheme(theme) {
+            document.documentElement.classList.toggle('dark', theme === 'dark');
+            document.getElementById('sun-icon').classList.toggle('hidden', theme !== 'dark');
+            document.getElementById('moon-icon').classList.toggle('hidden', theme === 'dark');
+            localStorage.setItem('theme', theme);
+        }
+        applyTheme(localStorage.getItem('theme') || 'light');
+        themeToggle.addEventListener('click', () => applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark'));
+
+        initAuth();
+    </script>
+</body>
+</html>
