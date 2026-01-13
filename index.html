@@ -33,7 +33,7 @@
 
         <header class="mb-8 text-center sm:text-left">
             <h1 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">Lista de Compras Pro</h1>
-            <p id="mode-desc" class="text-xs text-slate-500 dark:text-slate-400 mt-2">Cargando modo de almacenamiento...</p>
+            <p id="mode-desc" class="text-xs text-slate-500 dark:text-slate-400 mt-2 italic tracking-wide">Cargando...</p>
         </header>
 
         <!-- Selector de Modos -->
@@ -42,31 +42,33 @@
             <button onclick="setMode('shop')" id="btn-shop" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all text-slate-500">2. Comprar</button>
         </div>
 
-        <!-- Formulario -->
-        <div id="view-plan" class="space-y-6 animate-in fade-in">
-            <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
-                <div class="grid grid-cols-4 gap-3 mb-4">
-                    <div class="col-span-1">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 tracking-tighter uppercase">Cant.</label>
-                        <input type="number" id="plan-qty" value="1" min="1" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg outline-none dark:text-white border border-transparent focus:border-teal-500 transition-all">
-                    </div>
-                    <div class="col-span-3">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 tracking-tighter uppercase">Producto</label>
-                        <input type="text" id="plan-item" placeholder="¿Qué necesitas?" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg outline-none dark:text-white border border-transparent focus:border-teal-500 transition-all">
-                    </div>
+        <!-- FORMULARIO DINÁMICO -->
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 mb-6">
+            <div id="form-title" class="text-[10px] font-bold text-teal-600 dark:text-teal-400 mb-3 uppercase tracking-widest">Añadir a la lista</div>
+            <div class="grid grid-cols-4 gap-3 mb-4">
+                <div class="col-span-1">
+                    <label class="block text-[10px] font-bold text-slate-400 mb-1 tracking-tighter uppercase">Cant.</label>
+                    <input type="number" id="main-qty" value="1" min="1" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg outline-none dark:text-white border border-transparent focus:border-teal-500 transition-all text-sm">
                 </div>
-                <button onclick="addItem()" id="add-btn" class="w-full bg-slate-900 dark:bg-teal-600 text-white font-bold py-3 rounded-xl active:scale-95 transition-all shadow-lg dark:shadow-none">
-                    Añadir a la lista
-                </button>
+                <div class="col-span-3">
+                    <label class="block text-[10px] font-bold text-slate-400 mb-1 tracking-tighter uppercase">Producto</label>
+                    <input type="text" id="main-item" placeholder="¿Qué necesitas?" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg outline-none dark:text-white border border-transparent focus:border-teal-500 transition-all text-sm">
+                </div>
             </div>
+            <button onclick="addItem()" id="add-btn" class="w-full bg-slate-900 dark:bg-teal-600 text-white font-bold py-3 rounded-xl active:scale-95 transition-all shadow-lg dark:shadow-none text-sm">
+                Agregar ahora
+            </button>
         </div>
 
-        <!-- Vista Supermercado -->
-        <div id="view-shop" class="hidden animate-in fade-in duration-300">
+        <!-- Info de presupuesto (Solo en modo comprar) -->
+        <div id="view-shop-info" class="hidden animate-in fade-in duration-300">
             <div class="bg-teal-600 text-white p-6 rounded-2xl shadow-xl mb-6 relative overflow-hidden">
                 <div class="relative z-10">
-                    <h2 class="text-[10px] font-bold uppercase opacity-80 mb-1 tracking-widest text-white">Gasto Acumulado</h2>
-                    <p id="spent-total" class="text-3xl font-bold text-white">₡0.00</p>
+                    <h2 class="text-[10px] font-bold uppercase opacity-80 mb-1 tracking-widest text-white">Gasto Real en Carrito</h2>
+                    <p id="spent-total" class="text-3xl font-bold text-white tracking-tight">₡0.00</p>
+                </div>
+                <div class="absolute -right-4 -bottom-4 opacity-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="white"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
                 </div>
             </div>
         </div>
@@ -76,30 +78,41 @@
         </div>
         
         <div class="mt-6">
+            <!-- Sección principal -->
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-slate-400 text-[10px] uppercase tracking-widest" id="list-title">Artículos pendientes</h3>
-                <button onclick="showClearModal()" class="text-rose-500 text-[10px] font-bold uppercase hover:underline transition-all">Limpiar</button>
+                <button onclick="showClearModal()" class="text-rose-500 text-[10px] font-bold uppercase hover:underline transition-all">Limpiar todo</button>
             </div>
-            <ul id="shopping-list" class="space-y-3"></ul>
+            <ul id="shopping-list" class="space-y-3 mb-8"></ul>
+
+            <!-- Sección de comprados (Solo en modo comprar) -->
+            <div id="bought-section" class="hidden">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="h-[1px] flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                    <h3 class="font-bold text-slate-400 text-[10px] uppercase tracking-widest">Ya en el carrito</h3>
+                    <div class="h-[1px] flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                </div>
+                <ul id="bought-list" class="space-y-3 opacity-60"></ul>
+            </div>
         </div>
 
         <footer class="mt-16 mb-24 text-center border-t border-slate-200 dark:border-slate-800 pt-8">
-            <p class="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 font-medium leading-relaxed">
                 Hecho por <span class="text-slate-600 dark:text-slate-300">José Arturo Hernández Méndez</span> <br> 
                 con ayuda de <span class="text-teal-600 dark:text-teal-500">Gemini</span>
             </p>
         </footer>
     </div>
 
-    <!-- Barra de Total -->
+    <!-- Barra de Total Inferior -->
     <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 shadow-2xl z-40 transition-colors">
         <div class="max-w-md mx-auto flex justify-between items-center">
             <div>
-                <p class="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-tighter">Total Estimado</p>
+                <p class="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-tighter">Gasto Total</p>
                 <p id="total-amount-footer" class="text-2xl font-bold text-teal-600 dark:text-teal-400 tracking-tight">₡0.00</p>
             </div>
             <div class="text-right">
-                <span id="session-label" class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tighter">Modo Local</span>
+                <span id="session-label" class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tighter italic">Local</span>
             </div>
         </div>
     </div>
@@ -114,8 +127,8 @@
                 <input type="number" id="real-price-input" step="0.01" class="w-full pl-10 pr-4 py-4 bg-slate-100 dark:bg-slate-800 rounded-xl outline-none text-2xl font-bold dark:text-white border-2 border-transparent focus:border-teal-500 transition-all" placeholder="0.00">
             </div>
             <div class="flex gap-3">
-                <button onclick="closePriceModal()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-slate-600 dark:text-slate-400">Cancelar</button>
-                <button onclick="confirmPurchase()" class="flex-1 py-3 bg-teal-600 text-white rounded-xl font-bold">Confirmar</button>
+                <button onclick="closePriceModal()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-slate-600 dark:text-slate-400 transition-colors hover:bg-slate-200">Cancelar</button>
+                <button onclick="confirmPurchase()" class="flex-1 py-3 bg-teal-600 text-white rounded-xl font-bold transition-colors hover:bg-teal-700">Confirmar</button>
             </div>
         </div>
     </div>
@@ -123,6 +136,7 @@
     <div id="confirm-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800">
             <h3 class="text-xl font-bold mb-2 dark:text-white text-center">¿Vaciar lista?</h3>
+            <p class="text-xs text-slate-400 text-center mb-4">Se borrarán todos los artículos permanentemente.</p>
             <div class="flex gap-3 mt-6">
                 <button onclick="hideClearModal()" class="flex-1 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl font-semibold">No</button>
                 <button onclick="clearAllData()" class="flex-1 py-2 bg-rose-600 text-white rounded-xl font-semibold">Sí, borrar</button>
@@ -135,7 +149,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- TEMA ---
         const applyTheme = (t) => {
             document.documentElement.classList.toggle('dark', t === 'dark');
             document.getElementById('sun-icon').classList.toggle('hidden', t !== 'dark');
@@ -145,13 +158,9 @@
         applyTheme(localStorage.getItem('theme') || 'light');
         document.getElementById('theme-toggle').onclick = () => applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
 
-        // --- ESTADO Y CONFIGURACIÓN ---
-        let db, auth, currentUser, items = [], currentMode = 'plan', activeItemId = null;
-        let useCloud = false;
-
+        let db, auth, currentUser, items = [], currentMode = 'plan', activeItemId = null, useCloud = false;
         const LOCAL_KEY = 'lista_compras_jorge_local';
 
-        // Intentar detectar Firebase
         try {
             if (typeof __firebase_config !== 'undefined' && __firebase_config) {
                 const config = JSON.parse(__firebase_config);
@@ -162,9 +171,8 @@
             }
         } catch (e) { useCloud = false; }
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'lista-compras-jorge';
 
-        // --- INICIALIZACIÓN ---
         async function init() {
             if (useCloud) {
                 const initAuth = async () => {
@@ -181,8 +189,8 @@
                     if (user) {
                         currentUser = user;
                         document.getElementById('user-badge').innerText = `ID: ${user.uid.substring(0, 8)}`;
-                        document.getElementById('session-label').innerText = "Nube Activa";
-                        document.getElementById('mode-desc').innerText = "Tus datos se sincronizan con la nube en tiempo real.";
+                        document.getElementById('session-label').innerText = "Nube";
+                        document.getElementById('mode-desc').innerText = "Planea y compra en tiempo real.";
                         subscribeCloud();
                     }
                 });
@@ -194,19 +202,18 @@
 
         function switchLocal() {
             useCloud = false;
-            document.getElementById('user-badge').innerText = "ID: Navegador";
-            document.getElementById('session-label').innerText = "Modo Local";
-            document.getElementById('mode-desc').innerText = "Guardando datos en la memoria del navegador (GitHub).";
+            document.getElementById('user-badge').innerText = "ID: Local";
+            document.getElementById('session-label').innerText = "Local";
+            document.getElementById('mode-desc').innerText = "Guardado automático en el navegador.";
             loadLocal();
         }
 
-        // --- MANEJO DE DATOS ---
         function subscribeCloud() {
             const ref = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'items');
             onSnapshot(ref, (snap) => {
                 items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderItems();
-            });
+            }, (err) => console.error(err));
         }
 
         function loadLocal() {
@@ -222,9 +229,13 @@
 
         window.renderItems = () => {
             const listEl = document.getElementById('shopping-list');
+            const boughtListEl = document.getElementById('bought-list');
             const spentEl = document.getElementById('spent-total');
             const footerEl = document.getElementById('total-amount-footer');
+            const boughtSection = document.getElementById('bought-section');
+
             listEl.innerHTML = '';
+            boughtListEl.innerHTML = '';
             let totalSpent = 0;
 
             const sorted = [...items].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -234,26 +245,78 @@
                 const sub = (item.qty || 1) * (item.price || 0);
                 if (isPurchased) totalSpent += sub;
 
-                const li = document.createElement('li');
-                li.className = `bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex justify-between items-center ${isPurchased && currentMode === 'plan' ? 'opacity-40' : ''}`;
-                
                 if (currentMode === 'plan') {
-                    li.innerHTML = `<div class="flex items-center gap-3"><div class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-xs font-bold">${item.qty}x</div><span class="${isPurchased ? 'line-through' : ''}">${item.item}</span></div>
-                    <button onclick="deleteItem('${item.id}')" class="text-slate-300 hover:text-rose-500"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>`;
+                    // En modo PLANEAR, solo mostramos lo que NO se ha comprado
+                    if (!isPurchased) {
+                        const li = document.createElement('li');
+                        li.className = `bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex justify-between items-center transition-all`;
+                        li.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-xs font-bold text-slate-500">${item.qty}x</div>
+                                <span class="text-sm font-medium dark:text-slate-200">${item.item}</span>
+                            </div>
+                            <button onclick="deleteItem('${item.id}')" class="text-slate-300 hover:text-rose-500 transition-colors">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>`;
+                        listEl.appendChild(li);
+                    }
                 } else {
-                    li.innerHTML = `<div class="flex items-center gap-3 flex-1 cursor-pointer" onclick="openPriceModal('${item.id}', '${item.item}')"><div class="w-7 h-7 border-2 border-teal-500 rounded-full flex items-center justify-center ${isPurchased ? 'bg-teal-500' : ''}">${isPurchased ? '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}</div><div class="flex-1"><p class="text-sm font-bold ${isPurchased ? 'text-slate-400 line-through' : ''}">${item.qty}x ${item.item}</p><p class="text-[10px] ${isPurchased ? 'text-teal-600 font-bold' : 'text-slate-400 italic'}">${isPurchased ? '₡' + sub.toLocaleString('es-CR') : 'Tocar para poner precio'}</p></div></div>`;
+                    // En modo COMPRAR, dividimos las listas
+                    const li = document.createElement('li');
+                    li.className = `bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex justify-between items-center transition-all`;
+                    
+                    if (!isPurchased) {
+                        li.innerHTML = `
+                            <div class="flex items-center gap-3 flex-1 cursor-pointer" onclick="openPriceModal('${item.id}', '${item.item}')">
+                                <div class="w-7 h-7 border-2 border-teal-500 rounded-full flex items-center justify-center transition-all hover:bg-teal-50 dark:hover:bg-teal-900/20"></div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold dark:text-slate-200">${item.qty}x ${item.item}</p>
+                                    <p class="text-[10px] text-slate-400 italic">Tocar para poner precio</p>
+                                </div>
+                            </div>
+                            <button onclick="deleteItem('${item.id}')" class="text-slate-300 hover:text-rose-500 transition-colors px-2">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>`;
+                        listEl.appendChild(li);
+                    } else {
+                        li.innerHTML = `
+                            <div class="flex items-center gap-3 flex-1">
+                                <div class="w-7 h-7 bg-teal-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-slate-400 line-through">${item.qty}x ${item.item}</p>
+                                    <p class="text-[10px] text-teal-600 font-bold">₡${sub.toLocaleString('es-CR')}</p>
+                                </div>
+                            </div>
+                            <button onclick="editPrice('${item.id}')" class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-tighter px-2 hover:underline">Editar</button>`;
+                        boughtListEl.appendChild(li);
+                    }
                 }
-                listEl.appendChild(li);
             });
+
+            // Mostrar/Ocultar sección de comprados
+            if (currentMode === 'shop' && boughtListEl.children.length > 0) {
+                boughtSection.classList.remove('hidden');
+            } else {
+                boughtSection.classList.add('hidden');
+            }
+
+            // Mensajes cuando la lista principal está vacía
+            if (listEl.children.length === 0) {
+                const emptyMsg = document.createElement('li');
+                emptyMsg.className = "text-center py-6 text-slate-400 text-xs italic";
+                emptyMsg.innerText = currentMode === 'plan' ? "No hay pendientes. ¡Todo planeado!" : "Todos los productos están en el carrito.";
+                listEl.appendChild(emptyMsg);
+            }
 
             const txt = `₡${totalSpent.toLocaleString('es-CR', { minimumFractionDigits: 2 })}`;
             if(spentEl) spentEl.innerText = txt;
             footerEl.innerText = txt;
         };
 
-        // --- ACCIONES ---
         window.addItem = async () => {
-            const nEl = document.getElementById('plan-item'), qEl = document.getElementById('plan-qty');
+            const nEl = document.getElementById('main-item'), qEl = document.getElementById('main-qty');
             const name = nEl.value.trim(), qty = parseInt(qEl.value);
             if (!name || isNaN(qty)) return;
 
@@ -267,6 +330,18 @@
                 saveLocal();
             }
             nEl.value = ''; nEl.focus();
+            if (currentMode === 'shop') {
+                setTimeout(() => {
+                    // Abrir modal para el producto recién agregado en modo shop
+                    const target = useCloud ? items.find(i => i.item === name && !i.purchased) : newItem;
+                    if(target) openPriceModal(target.id, target.item);
+                }, 400);
+            }
+        };
+
+        window.editPrice = (id) => {
+            const item = items.find(i => i.id === id);
+            if(item) openPriceModal(id, item.item);
         };
 
         window.deleteItem = async (id) => {
@@ -279,7 +354,8 @@
         };
 
         window.confirmPurchase = async () => {
-            const p = parseFloat(document.getElementById('real-price-input').value);
+            const val = document.getElementById('real-price-input').value;
+            const p = parseFloat(val);
             if (isNaN(p) || !activeItemId) return;
 
             if (useCloud) {
@@ -308,17 +384,24 @@
             hideClearModal();
         };
 
-        // --- UI ---
         window.setMode = (m) => {
             currentMode = m;
             document.getElementById('btn-plan').className = m === 'plan' ? "flex-1 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 shadow-sm transition-all" : "flex-1 py-2 text-sm font-bold text-slate-500 transition-all";
             document.getElementById('btn-shop').className = m === 'shop' ? "flex-1 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 shadow-sm transition-all" : "flex-1 py-2 text-sm font-bold text-slate-500 transition-all";
-            document.getElementById('view-plan').classList.toggle('hidden', m !== 'plan');
-            document.getElementById('view-shop').classList.toggle('hidden', m !== 'shop');
+            
+            document.getElementById('form-title').innerText = m === 'plan' ? "Planear lista" : "Añadir sobre la marcha";
+            document.getElementById('view-shop-info').classList.toggle('hidden', m !== 'shop');
+            document.getElementById('list-title').innerText = m === 'plan' ? "Artículos por comprar" : "Lista pendiente";
             renderItems();
         };
 
-        window.openPriceModal = (id, n) => { activeItemId = id; document.getElementById('modal-item-name').innerText = n; document.getElementById('real-price-input').value = ''; document.getElementById('price-modal').classList.remove('hidden'); };
+        window.openPriceModal = (id, n) => { 
+            activeItemId = id; 
+            document.getElementById('modal-item-name').innerText = n; 
+            document.getElementById('real-price-input').value = ''; 
+            document.getElementById('price-modal').classList.remove('hidden'); 
+            setTimeout(() => document.getElementById('real-price-input').focus(), 200);
+        };
         window.closePriceModal = () => document.getElementById('price-modal').classList.add('hidden');
         window.showClearModal = () => document.getElementById('confirm-modal').classList.remove('hidden');
         window.hideClearModal = () => document.getElementById('confirm-modal').classList.add('hidden');
