@@ -12,7 +12,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; transition: background-color 0.3s ease; }
         .modal-overlay { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); }
-        .line-through-thick { text-decoration: line-through; text-decoration-thickness: 2px; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen pb-20">
@@ -20,12 +19,12 @@
     <div class="max-w-md mx-auto px-4 pt-6">
         <!-- Barra superior -->
         <div class="flex justify-between items-center mb-6">
-            <div id="user-badge" class="bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-mono px-2 py-1 rounded-md overflow-hidden text-ellipsis whitespace-nowrap max-w-[120px]">
-                ID: Desconectado
+            <div id="user-badge" class="bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-mono px-2 py-1 rounded-md overflow-hidden text-ellipsis whitespace-nowrap max-w-[150px]">
+                ID: Local
             </div>
             
             <div class="flex gap-2">
-                <button id="theme-toggle" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-yellow-400">
+                <button id="theme-toggle" class="p-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-yellow-400 hover:scale-105 active:scale-95 transition-all">
                     <svg id="sun-icon" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"/></svg>
                     <svg id="moon-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
                 </button>
@@ -34,45 +33,40 @@
 
         <header class="mb-8 text-center sm:text-left">
             <h1 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">Lista de Compras Pro</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                Organiza tus compras: planea y controla tu presupuesto en tiempo real.
-            </p>
+            <p id="mode-desc" class="text-xs text-slate-500 dark:text-slate-400 mt-2">Cargando modo de almacenamiento...</p>
         </header>
-
-        <!-- Aviso de Configuración (Solo se ve si falla Firebase) -->
-        <div id="config-warning" class="hidden bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-xl mb-6 text-[11px] text-amber-700 dark:text-amber-400">
-            ⚠️ <strong>Modo Offline:</strong> No se detectó configuración de nube. Los datos no se guardarán permanentemente en GitHub hasta que configures tu proyecto de Firebase.
-        </div>
 
         <!-- Selector de Modos -->
         <div class="flex bg-slate-200 dark:bg-slate-900 p-1 rounded-2xl mb-8">
-            <button onclick="setMode('plan')" id="btn-plan" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-800 shadow-sm">1. Planear Lista</button>
-            <button onclick="setMode('shop')" id="btn-shop" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all text-slate-500">2. En el Súper</button>
+            <button onclick="setMode('plan')" id="btn-plan" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-800 shadow-sm">1. Planear</button>
+            <button onclick="setMode('shop')" id="btn-shop" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all text-slate-500">2. Comprar</button>
         </div>
 
-        <div id="view-plan" class="space-y-6">
+        <!-- Formulario -->
+        <div id="view-plan" class="space-y-6 animate-in fade-in">
             <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                 <div class="grid grid-cols-4 gap-3 mb-4">
                     <div class="col-span-1">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 tracking-tighter uppercase">CANT.</label>
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1 tracking-tighter uppercase">Cant.</label>
                         <input type="number" id="plan-qty" value="1" min="1" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg outline-none dark:text-white border border-transparent focus:border-teal-500 transition-all">
                     </div>
                     <div class="col-span-3">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 tracking-tighter uppercase">PRODUCTO</label>
-                        <input type="text" id="plan-item" placeholder="¿Qué falta?" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg outline-none dark:text-white border border-transparent focus:border-teal-500 transition-all">
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1 tracking-tighter uppercase">Producto</label>
+                        <input type="text" id="plan-item" placeholder="¿Qué necesitas?" class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg outline-none dark:text-white border border-transparent focus:border-teal-500 transition-all">
                     </div>
                 </div>
-                <button id="add-btn" class="w-full bg-slate-900 dark:bg-teal-600 text-white font-bold py-3 rounded-xl active:scale-95 transition-all shadow-lg dark:shadow-none disabled:opacity-50">
+                <button onclick="addItem()" id="add-btn" class="w-full bg-slate-900 dark:bg-teal-600 text-white font-bold py-3 rounded-xl active:scale-95 transition-all shadow-lg dark:shadow-none">
                     Añadir a la lista
                 </button>
             </div>
         </div>
 
+        <!-- Vista Supermercado -->
         <div id="view-shop" class="hidden animate-in fade-in duration-300">
             <div class="bg-teal-600 text-white p-6 rounded-2xl shadow-xl mb-6 relative overflow-hidden">
                 <div class="relative z-10">
-                    <h2 class="text-[10px] font-bold uppercase opacity-80 mb-1 tracking-widest">Presupuesto en Carrito</h2>
-                    <p id="spent-total" class="text-3xl font-bold">₡0.00</p>
+                    <h2 class="text-[10px] font-bold uppercase opacity-80 mb-1 tracking-widest text-white">Gasto Acumulado</h2>
+                    <p id="spent-total" class="text-3xl font-bold text-white">₡0.00</p>
                 </div>
             </div>
         </div>
@@ -84,7 +78,7 @@
         <div class="mt-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-slate-400 text-[10px] uppercase tracking-widest" id="list-title">Artículos pendientes</h3>
-                <button onclick="showClearModal()" class="text-rose-500 text-[10px] font-bold uppercase hover:underline">Vaciar lista</button>
+                <button onclick="showClearModal()" class="text-rose-500 text-[10px] font-bold uppercase hover:underline transition-all">Limpiar</button>
             </div>
             <ul id="shopping-list" class="space-y-3"></ul>
         </div>
@@ -97,14 +91,15 @@
         </footer>
     </div>
 
+    <!-- Barra de Total -->
     <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 shadow-2xl z-40 transition-colors">
         <div class="max-w-md mx-auto flex justify-between items-center">
             <div>
-                <p class="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-tighter">Total en Caja</p>
+                <p class="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-tighter">Total Estimado</p>
                 <p id="total-amount-footer" class="text-2xl font-bold text-teal-600 dark:text-teal-400 tracking-tight">₡0.00</p>
             </div>
             <div class="text-right">
-                <span id="session-label" class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tighter">Cargando...</span>
+                <span id="session-label" class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tighter">Modo Local</span>
             </div>
         </div>
     </div>
@@ -113,23 +108,23 @@
     <div id="price-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl animate-in zoom-in-95 duration-200">
             <h3 class="text-lg font-bold mb-1 dark:text-white" id="modal-item-name">Producto</h3>
-            <p class="text-xs text-slate-500 mb-4 italic">¿Cuánto cuesta en el estante?</p>
+            <p class="text-xs text-slate-500 mb-4 italic">Precio unitario actual:</p>
             <div class="relative mb-6">
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xl">₡</span>
-                <input type="number" id="real-price-input" step="0.01" class="w-full pl-10 pr-4 py-4 bg-slate-100 dark:bg-slate-800 rounded-xl outline-none text-2xl font-bold dark:text-white border-2 border-transparent focus:border-teal-500 transition-all" placeholder="0.00" autofocus>
+                <input type="number" id="real-price-input" step="0.01" class="w-full pl-10 pr-4 py-4 bg-slate-100 dark:bg-slate-800 rounded-xl outline-none text-2xl font-bold dark:text-white border-2 border-transparent focus:border-teal-500 transition-all" placeholder="0.00">
             </div>
             <div class="flex gap-3">
                 <button onclick="closePriceModal()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-slate-600 dark:text-slate-400">Cancelar</button>
-                <button onclick="confirmPurchase()" class="flex-1 py-3 bg-teal-600 text-white rounded-xl font-bold">Al Carrito</button>
+                <button onclick="confirmPurchase()" class="flex-1 py-3 bg-teal-600 text-white rounded-xl font-bold">Confirmar</button>
             </div>
         </div>
     </div>
 
     <div id="confirm-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800">
-            <h3 class="text-xl font-bold mb-2 dark:text-white">¿Vaciar lista?</h3>
+            <h3 class="text-xl font-bold mb-2 dark:text-white text-center">¿Vaciar lista?</h3>
             <div class="flex gap-3 mt-6">
-                <button onclick="hideClearModal()" class="flex-1 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl font-semibold hover:bg-slate-200 transition-colors">No</button>
+                <button onclick="hideClearModal()" class="flex-1 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl font-semibold">No</button>
                 <button onclick="clearAllData()" class="flex-1 py-2 bg-rose-600 text-white rounded-xl font-semibold">Sí, borrar</button>
             </div>
         </div>
@@ -140,127 +135,195 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- LÓGICA DE TEMA (Separada para que no falle) ---
-        const applyTheme = (theme) => {
-            document.documentElement.classList.toggle('dark', theme === 'dark');
-            document.getElementById('sun-icon').classList.toggle('hidden', theme !== 'dark');
-            document.getElementById('moon-icon').classList.toggle('hidden', theme === 'dark');
-            localStorage.setItem('theme', theme);
+        // --- TEMA ---
+        const applyTheme = (t) => {
+            document.documentElement.classList.toggle('dark', t === 'dark');
+            document.getElementById('sun-icon').classList.toggle('hidden', t !== 'dark');
+            document.getElementById('moon-icon').classList.toggle('hidden', t === 'dark');
+            localStorage.setItem('theme', t);
         };
         applyTheme(localStorage.getItem('theme') || 'light');
         document.getElementById('theme-toggle').onclick = () => applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
 
-        // --- CONFIGURACIÓN DE FIREBASE ---
-        // PARA GITHUB: Reemplaza las llaves de abajo con las de tu consola de Firebase
-        let firebaseConfig = null;
+        // --- ESTADO Y CONFIGURACIÓN ---
+        let db, auth, currentUser, items = [], currentMode = 'plan', activeItemId = null;
+        let useCloud = false;
+
+        const LOCAL_KEY = 'lista_compras_jorge_local';
+
+        // Intentar detectar Firebase
         try {
-            if (typeof __firebase_config !== 'undefined') {
-                firebaseConfig = JSON.parse(__firebase_config);
-            } else {
-                // AQUÍ puedes pegar tu config de Firebase si quieres que funcione en GitHub
-                // firebaseConfig = { apiKey: "...", authDomain: "...", ... };
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                const config = JSON.parse(__firebase_config);
+                const app = initializeApp(config);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                useCloud = true;
             }
-        } catch (e) { console.warn("Firebase config parse failed"); }
+        } catch (e) { useCloud = false; }
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'lista-jorge-github';
-        let currentUser = null, items = [], currentMode = 'plan', activeItemId = null, db = null, auth = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app';
 
-        if (firebaseConfig) {
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            
-            const initAuth = async () => {
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
+        // --- INICIALIZACIÓN ---
+        async function init() {
+            if (useCloud) {
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (err) { switchLocal(); }
+                };
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        currentUser = user;
+                        document.getElementById('user-badge').innerText = `ID: ${user.uid.substring(0, 8)}`;
+                        document.getElementById('session-label').innerText = "Nube Activa";
+                        document.getElementById('mode-desc').innerText = "Tus datos se sincronizan con la nube en tiempo real.";
+                        subscribeCloud();
                     }
-                } catch (err) { console.error("Auth error", err); }
-            };
-
-            onAuthStateChanged(auth, (user) => {
-                currentUser = user;
-                if (user) {
-                    document.getElementById('user-badge').innerText = `ID: ${user.uid.substring(0, 10)}...`;
-                    document.getElementById('session-label').innerText = "En Línea";
-                    subscribeToData();
-                }
-            });
-            initAuth();
-        } else {
-            document.getElementById('config-warning').classList.remove('hidden');
-            document.getElementById('session-label').innerText = "Sin Nube";
-            document.getElementById('add-btn').disabled = true; // Desactivar si no hay DB
+                });
+                initAuth();
+            } else {
+                switchLocal();
+            }
         }
 
-        function subscribeToData() {
-            if (!currentUser || !db) return;
-            document.getElementById('loading-spinner').classList.remove('hidden');
-            const itemsRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'items');
-            onSnapshot(itemsRef, (snapshot) => {
-                items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        function switchLocal() {
+            useCloud = false;
+            document.getElementById('user-badge').innerText = "ID: Navegador";
+            document.getElementById('session-label').innerText = "Modo Local";
+            document.getElementById('mode-desc').innerText = "Guardando datos en la memoria del navegador (GitHub).";
+            loadLocal();
+        }
+
+        // --- MANEJO DE DATOS ---
+        function subscribeCloud() {
+            const ref = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'items');
+            onSnapshot(ref, (snap) => {
+                items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderItems();
-                document.getElementById('loading-spinner').classList.add('hidden');
             });
         }
 
-        // El resto de funciones (renderItems, setMode, addItem, etc.)
-        window.setMode = (mode) => {
-            currentMode = mode;
-            document.getElementById('btn-plan').className = mode === 'plan' ? "flex-1 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 shadow-sm" : "flex-1 py-2 text-sm font-bold text-slate-500";
-            document.getElementById('btn-shop').className = mode === 'shop' ? "flex-1 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 shadow-sm" : "flex-1 py-2 text-sm font-bold text-slate-500";
-            document.getElementById('view-plan').classList.toggle('hidden', mode !== 'plan');
-            document.getElementById('view-shop').classList.toggle('hidden', mode !== 'shop');
-            document.getElementById('list-title').innerText = mode === 'plan' ? "Artículos para comprar" : "Control de Carrito";
+        function loadLocal() {
+            const data = localStorage.getItem(LOCAL_KEY);
+            items = data ? JSON.parse(data) : [];
             renderItems();
-        };
+        }
 
-        function renderItems() {
+        function saveLocal() {
+            localStorage.setItem(LOCAL_KEY, JSON.stringify(items));
+            renderItems();
+        }
+
+        window.renderItems = () => {
             const listEl = document.getElementById('shopping-list');
             const spentEl = document.getElementById('spent-total');
-            const footerTotalEl = document.getElementById('total-amount-footer');
+            const footerEl = document.getElementById('total-amount-footer');
             listEl.innerHTML = '';
             let totalSpent = 0;
 
-            items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).forEach(item => {
-                const isPurchased = item.purchased || false;
-                const subtotal = (item.qty || 0) * (item.price || 0);
-                if (isPurchased) totalSpent += subtotal;
+            const sorted = [...items].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+            sorted.forEach(item => {
+                const isPurchased = !!item.purchased;
+                const sub = (item.qty || 1) * (item.price || 0);
+                if (isPurchased) totalSpent += sub;
 
                 const li = document.createElement('li');
                 li.className = `bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex justify-between items-center ${isPurchased && currentMode === 'plan' ? 'opacity-40' : ''}`;
                 
                 if (currentMode === 'plan') {
-                    li.innerHTML = `<div class="flex items-center gap-3"><div class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-xs font-bold text-slate-500">${item.qty}x</div><span class="font-medium text-sm dark:text-slate-200 ${isPurchased ? 'line-through' : ''}">${item.item}</span></div>
-                    <button onclick="deleteItem('${item.id}')" class="text-slate-300 hover:text-rose-500"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>`;
+                    li.innerHTML = `<div class="flex items-center gap-3"><div class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-xs font-bold">${item.qty}x</div><span class="${isPurchased ? 'line-through' : ''}">${item.item}</span></div>
+                    <button onclick="deleteItem('${item.id}')" class="text-slate-300 hover:text-rose-500"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>`;
                 } else {
-                    li.innerHTML = `<div class="flex items-center gap-3 flex-1" onclick="openPriceModal('${item.id}', '${item.item}')"><div class="w-7 h-7 border-2 border-teal-500 rounded-full flex items-center justify-center ${isPurchased ? 'bg-teal-500' : ''}">${isPurchased ? '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}</div><div class="flex-1"><p class="text-sm font-bold ${isPurchased ? 'text-slate-400 line-through' : ''}">${item.qty}x ${item.item}</p><p class="text-[10px] ${isPurchased ? 'text-teal-600 font-bold' : 'text-slate-400 italic'}">${isPurchased ? '₡' + subtotal.toLocaleString('es-CR') : 'Tocar para poner precio'}</p></div></div>`;
+                    li.innerHTML = `<div class="flex items-center gap-3 flex-1 cursor-pointer" onclick="openPriceModal('${item.id}', '${item.item}')"><div class="w-7 h-7 border-2 border-teal-500 rounded-full flex items-center justify-center ${isPurchased ? 'bg-teal-500' : ''}">${isPurchased ? '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}</div><div class="flex-1"><p class="text-sm font-bold ${isPurchased ? 'text-slate-400 line-through' : ''}">${item.qty}x ${item.item}</p><p class="text-[10px] ${isPurchased ? 'text-teal-600 font-bold' : 'text-slate-400 italic'}">${isPurchased ? '₡' + sub.toLocaleString('es-CR') : 'Tocar para poner precio'}</p></div></div>`;
                 }
                 listEl.appendChild(li);
             });
 
             const txt = `₡${totalSpent.toLocaleString('es-CR', { minimumFractionDigits: 2 })}`;
             if(spentEl) spentEl.innerText = txt;
-            footerTotalEl.innerText = txt;
-        }
-
-        window.addItem = async () => {
-            const name = document.getElementById('plan-item').value.trim();
-            const qty = parseInt(document.getElementById('plan-qty').value);
-            if (!name || isNaN(qty) || !db) return;
-            await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'items'), { item: name, qty, price: 0, purchased: false, createdAt: Date.now() });
-            document.getElementById('plan-item').value = '';
+            footerEl.innerText = txt;
         };
 
-        window.openPriceModal = (id, name) => { activeItemId = id; document.getElementById('modal-item-name').innerText = name; document.getElementById('real-price-input').value = ''; document.getElementById('price-modal').classList.remove('hidden'); setTimeout(() => document.getElementById('real-price-input').focus(), 150); };
+        // --- ACCIONES ---
+        window.addItem = async () => {
+            const nEl = document.getElementById('plan-item'), qEl = document.getElementById('plan-qty');
+            const name = nEl.value.trim(), qty = parseInt(qEl.value);
+            if (!name || isNaN(qty)) return;
+
+            const newItem = { item: name, qty, price: 0, purchased: false, createdAt: Date.now() };
+
+            if (useCloud && currentUser) {
+                await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'items'), newItem);
+            } else {
+                newItem.id = Date.now().toString();
+                items.push(newItem);
+                saveLocal();
+            }
+            nEl.value = ''; nEl.focus();
+        };
+
+        window.deleteItem = async (id) => {
+            if (useCloud) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'items', id));
+            } else {
+                items = items.filter(i => i.id !== id);
+                saveLocal();
+            }
+        };
+
+        window.confirmPurchase = async () => {
+            const p = parseFloat(document.getElementById('real-price-input').value);
+            if (isNaN(p) || !activeItemId) return;
+
+            if (useCloud) {
+                await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'items', activeItemId), { price: p, purchased: true });
+            } else {
+                const idx = items.findIndex(i => i.id === activeItemId);
+                if(idx !== -1) {
+                    items[idx].price = p;
+                    items[idx].purchased = true;
+                    saveLocal();
+                }
+            }
+            closePriceModal();
+        };
+
+        window.clearAllData = async () => {
+            if (useCloud) {
+                const snap = await getDocs(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'items'));
+                const batch = writeBatch(db);
+                snap.forEach(d => batch.delete(d.ref));
+                await batch.commit();
+            } else {
+                items = [];
+                saveLocal();
+            }
+            hideClearModal();
+        };
+
+        // --- UI ---
+        window.setMode = (m) => {
+            currentMode = m;
+            document.getElementById('btn-plan').className = m === 'plan' ? "flex-1 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 shadow-sm transition-all" : "flex-1 py-2 text-sm font-bold text-slate-500 transition-all";
+            document.getElementById('btn-shop').className = m === 'shop' ? "flex-1 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 shadow-sm transition-all" : "flex-1 py-2 text-sm font-bold text-slate-500 transition-all";
+            document.getElementById('view-plan').classList.toggle('hidden', m !== 'plan');
+            document.getElementById('view-shop').classList.toggle('hidden', m !== 'shop');
+            renderItems();
+        };
+
+        window.openPriceModal = (id, n) => { activeItemId = id; document.getElementById('modal-item-name').innerText = n; document.getElementById('real-price-input').value = ''; document.getElementById('price-modal').classList.remove('hidden'); };
         window.closePriceModal = () => document.getElementById('price-modal').classList.add('hidden');
-        window.confirmPurchase = async () => { const price = parseFloat(document.getElementById('real-price-input').value); if (isNaN(price) || !activeItemId) return; await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'items', activeItemId), { price: price, purchased: true }); closePriceModal(); };
-        window.deleteItem = async (id) => await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'items', id));
-        window.clearAllData = async () => { const snap = await getDocs(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'items')); const batch = writeBatch(db); snap.forEach(d => batch.delete(d.ref)); await batch.commit(); hideClearModal(); };
         window.showClearModal = () => document.getElementById('confirm-modal').classList.remove('hidden');
         window.hideClearModal = () => document.getElementById('confirm-modal').classList.add('hidden');
+
+        init();
     </script>
 </body>
 </html>
